@@ -28,10 +28,12 @@ blank mip levels, so the boxes fade out there.
 
 The fix is an `openvr_api.dll` for Reality Mixer's folder. It forwards
 everything to the original (renamed `openvr_api_real.dll`). Whenever Reality
-Mixer calls SteamVR from its drawing thread (at most every 250 ms; in practice
-every few seconds), it copies what Reality Mixer painted back into Reality
-Mixer's texture and submits it again, so SteamVR rebuilds the mip levels from
-the painted image. A brand-new box can look faded for those few seconds.
+Mixer calls SteamVR from the thread that created its boxes (at most every
+250 ms; in practice every few seconds), it copies what Reality Mixer painted
+into a texture of its own and submits that, so SteamVR rebuilds the mip levels
+from the painted image. That copy lives on the fix's own Direct3D device, so it
+never waits on Reality Mixer's device (re-submitting on Reality Mixer's device
+froze it while editing boxes, in v0.1.0-alpha). A brand-new box can look faded for those few seconds.
 Nothing else changes, and `RealityMixer.exe` is not modified. A short log goes to `%TEMP%\rmfix.log`.
 
 The proper fix belongs in Reality Mixer: submit the texture again (or build
